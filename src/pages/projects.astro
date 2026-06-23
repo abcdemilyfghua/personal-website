@@ -1,0 +1,308 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+const pieces = [
+  {
+    id: 1,
+    title: "Project One",
+    type: "code",
+    img: "https://placehold.co/600x400/1a1a1a/e8e8e8?text=Project+One",
+    description: "A short description of what this is and why you made it.",
+    github: "https://github.com",
+    live: "https://yoursite.com",
+  },
+  {
+    id: 2,
+    title: "Artwork One",
+    type: "artwork",
+    img: "https://placehold.co/500x700/1a1a1a/e8e8e8?text=Artwork+One",
+    description: "A piece I made exploring light and texture.",
+    github: null,
+    live: null,
+  },
+  {
+    id: 3,
+    title: "Photo Series",
+    type: "photography",
+    img: "https://placehold.co/800x500/1a1a1a/e8e8e8?text=Photography",
+    description: "Shot on a trip through the city at golden hour.",
+    github: null,
+    live: null,
+  },
+  {
+    id: 4,
+    title: "Side Project",
+    type: "code",
+    img: "https://placehold.co/600x600/1a1a1a/e8e8e8?text=Side+Project",
+    description: "Built this to solve a problem I kept running into.",
+    github: "https://github.com",
+    live: null,
+  },
+  {
+    id: 5,
+    title: "Illustration",
+    type: "artwork",
+    img: "https://placehold.co/400x600/1a1a1a/e8e8e8?text=Illustration",
+    description: "Digital illustration done in Procreate.",
+    github: null,
+    live: null,
+  },
+  {
+    id: 6,
+    title: "Portrait",
+    type: "photography",
+    img: "https://placehold.co/500x500/1a1a1a/e8e8e8?text=Portrait",
+    description: "Portrait series, natural light only.",
+    github: null,
+    live: null,
+  },
+];
+---
+
+<Layout title="Emily — Work">
+  <main>
+    <div class="gallery">
+      {pieces.map((piece) => (
+        <div
+          class="frame"
+          data-piece={JSON.stringify(piece)}
+        >
+          <img src={piece.img} alt={piece.title} />
+          <div class="frame-label">
+            <span class="frame-title">{piece.title}</span>
+            <span class="frame-type">{piece.type}</span>
+          </div>
+        </div>
+      ))}
+    </div>
+  </main>
+
+  <!-- Lightbox -->
+  <div class="lightbox" id="lightbox">
+    <button class="close" id="lightbox-close">✕</button>
+    <div class="lightbox-inner">
+      <img id="lb-img" src="" alt="" />
+      <div class="lb-info">
+        <p class="lb-type" id="lb-type"></p>
+        <h2 id="lb-title"></h2>
+        <p id="lb-desc"></p>
+        <div class="lb-links" id="lb-links"></div>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  main {
+    padding: 7rem 2rem 4rem;
+  }
+
+  .gallery {
+    columns: 3;
+    column-gap: 1.5rem;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  @media (max-width: 768px) {
+    .gallery { columns: 2; }
+  }
+
+  @media (max-width: 480px) {
+    .gallery { columns: 1; }
+  }
+
+  .frame {
+    break-inside: avoid;
+    margin-bottom: 1.5rem;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+
+  .frame img {
+    width: 100%;
+    display: block;
+    transition: transform 0.4s ease;
+  }
+
+  .frame:hover img {
+    transform: scale(1.03);
+  }
+
+  .frame-label {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 2rem 1rem 1rem;
+    background: linear-gradient(transparent, rgba(0,0,0,0.7));
+    opacity: 0;
+    transition: opacity 0.3s;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+
+  .frame:hover .frame-label {
+    opacity: 1;
+  }
+
+  .frame-title {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #fff;
+  }
+
+  .frame-type {
+    font-size: 0.75rem;
+    color: rgba(255,255,255,0.6);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  /* Lightbox */
+  .lightbox {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.92);
+    z-index: 1000;
+    padding: 2rem;
+    overflow-y: auto;
+  }
+
+  .lightbox.open {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .lightbox-inner {
+    display: flex;
+    gap: 3rem;
+    max-width: 1000px;
+    width: 100%;
+    align-items: center;
+  }
+
+  @media (max-width: 700px) {
+    .lightbox-inner { flex-direction: column; }
+  }
+
+  .lightbox-inner img {
+    max-width: 55%;
+    max-height: 80vh;
+    object-fit: contain;
+    flex-shrink: 0;
+  }
+
+  @media (max-width: 700px) {
+    .lightbox-inner img { max-width: 100%; }
+  }
+
+  .lb-info {
+    color: #e8e8e8;
+  }
+
+  .lb-type {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(255,255,255,0.45);
+    margin-bottom: 0.5rem;
+  }
+
+  .lb-info h2 {
+    font-size: 1.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .lb-info p {
+    font-size: 0.95rem;
+    line-height: 1.7;
+    color: rgba(255,255,255,0.65);
+    margin-bottom: 1.5rem;
+  }
+
+  .lb-links {
+    display: flex;
+    gap: 1rem;
+  }
+
+  .lb-links a {
+    font-size: 0.85rem;
+    color: #e8e8e8;
+    text-decoration: none;
+    border: 1px solid rgba(255,255,255,0.25);
+    padding: 0.4rem 1rem;
+    border-radius: 999px;
+    transition: border-color 0.2s;
+  }
+
+  .lb-links a:hover {
+    border-color: rgba(255,255,255,0.7);
+  }
+
+  .close {
+    position: fixed;
+    top: 1.5rem;
+    right: 1.5rem;
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 1.25rem;
+    cursor: pointer;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+  }
+
+  .close:hover {
+    opacity: 1;
+  }
+</style>
+
+<script>
+  const lightbox = document.getElementById('lightbox');
+  const closeBtn = document.getElementById('lightbox-close');
+
+  document.querySelectorAll('.frame').forEach(frame => {
+    frame.addEventListener('click', () => {
+      const piece = JSON.parse(frame.dataset.piece);
+
+      document.getElementById('lb-img').src = piece.img;
+      document.getElementById('lb-img').alt = piece.title;
+      document.getElementById('lb-title').textContent = piece.title;
+      document.getElementById('lb-desc').textContent = piece.description;
+      document.getElementById('lb-type').textContent = piece.type;
+
+      const links = document.getElementById('lb-links');
+      links.innerHTML = '';
+      if (piece.github) links.innerHTML += `<a href="${piece.github}" target="_blank">GitHub →</a>`;
+      if (piece.live) links.innerHTML += `<a href="${piece.live}" target="_blank">Live site →</a>`;
+
+      lightbox.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    });
+  });
+
+  closeBtn.addEventListener('click', () => {
+    lightbox.classList.remove('open');
+    document.body.style.overflow = '';
+  });
+
+  lightbox.addEventListener('click', (e) => {
+    if (e.target === lightbox) {
+      lightbox.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      lightbox.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+  });
+</script>
