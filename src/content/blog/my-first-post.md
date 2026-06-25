@@ -4,7 +4,7 @@ category: "New Territory"
 date: "June 22, 2026"
 readTime: 4
 excerpt: "The start of something new."
-featured: false
+featured: true
 ---
 
 Hi.
