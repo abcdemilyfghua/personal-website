@@ -7,7 +7,7 @@ excerpt: "If you ever need help building a nightstand, give me a call and I got 
 featured: false
 ---
 
-I built a nightstand the today and discovered a newfound love for building furniture.
+I built a nightstand today and discovered a newfound love for building furniture.
 
 Jess (my sister) and I had gone to San Francisco earlier that day with our puppy to hang out at Mission Dolores and see some of the festivities that were being hosted for Pride. We had gotten back to her apartment around 6 or 7pm ish *yes 67, i know im so funny* and Jess had gotten to work putting up a bookshelf on her wall. I was tasked with building her bedside table. I had never done something like this before, but didn't think it would be that hard, so I cut open the cardboard, took out the pieces, and laid them out. In my mind, this was just like building a lego set, something I have **loads** of experience and enjoyment doing.
 
