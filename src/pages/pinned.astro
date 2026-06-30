@@ -1,0 +1,586 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+
+const places = await getCollection('places');
+
+const categoryEmoji: Record<string, string> = {
+  'eats': '🍽',
+  'cafes-sweets': '☕',
+  'outside': '🌿',
+  'culture': '🏛',
+  'bookstores': '📚',
+  'landmarks': '📍',
+};
+
+const categoryLabel: Record<string, string> = {
+  'eats': 'Eats',
+  'cafes-sweets': 'Cafes & Sweets',
+  'outside': 'Outside',
+  'culture': 'Culture',
+  'bookstores': 'Bookstores',
+  'landmarks': 'Landmarks',
+};
+
+const categoryColor: Record<string, string> = {
+  'eats': '#cf6f6f',
+  'cafes-sweets': '#cfaa6f',
+  'outside': '#6fcf97',
+  'culture': '#6fb5cf',
+  'bookstores': '#b06fcf',
+  'landmarks': '#b8d96f',
+};
+
+const collectionLabel: Record<string, string> = {
+  'all': 'All',
+  'gt': '🎓 GT',
+  'home': '🏠 Home',
+  'sissy': '👯 Jess\' Place',
+};
+
+function toStars(rating: number): string {
+  const stars = Math.round(rating * 2) / 2 / 2;
+  let result = '';
+  for (let i = 1; i <= 5; i++) {
+    if (stars >= i) result += '★';
+    else if (stars >= i - 0.5) result += '½';
+    else result += '☆';
+  }
+  return result;
+}
+
+const placesData = places.map(p => ({
+  id: p.id,
+  ...p.data,
+}));
+---
+
+<Layout title="Pinned — Emily">
+  <main>
+    <div class="page-header">
+      <h1>Pinned</h1>
+      <p class="sub">Places I keep thinking about.</p>
+    </div>
+
+    <div class="controls">
+      <div class="top-row">
+        <div class="collection-tabs" id="collection-tabs">
+          {Object.entries(collectionLabel).map(([key, label]) => (
+            <button class={`coll-tab ${key === 'all' ? 'active' : ''}`} data-collection={key}>
+              {label}
+            </button>
+          ))}
+        </div>
+        <div class="view-tabs">
+          <button class="tab active" data-tab="grid">Grid</button>
+          <button class="tab" data-tab="list">List</button>
+          <button class="tab" data-tab="map">Map</button>
+        </div>
+      </div>
+      <div class="filters">
+        <button class="filter active" data-cat="all">All</button>
+        {Object.entries(categoryLabel).map(([key, label]) => (
+          <button class="filter" data-cat={key}>
+            {categoryEmoji[key]} {label}
+          </button>
+        ))}
+      </div>
+    </div>
+
+    <!-- GRID VIEW -->
+    <div id="view-grid" class="view active">
+      <div class="grid">
+        {placesData.map(place => (
+          <div
+            class="place-card"
+            data-cat={place.category}
+            data-collection={place.collection ?? ''}
+          >
+            {place.img
+              ? <img src={place.img} alt={place.title} class="card-img" />
+              : <div class="card-img placeholder" style={`color:${categoryColor[place.category]}`}>
+                  {categoryEmoji[place.category]}
+                </div>
+            }
+            <div class="card-body">
+              <div class="card-meta">
+                <span class="cat-pill" style={`color:${categoryColor[place.category]}`}>
+                  {categoryEmoji[place.category]} {categoryLabel[place.category]}
+                </span>
+                {place.mustReturn && <span class="must-return">★ must return</span>}
+              </div>
+              <h3>{place.title}</h3>
+              <p class="city">{place.city}</p>
+              <div class="stars" title={`${place.rating}/10`}>
+                {toStars(place.rating)}
+                <span class="rating-num">{place.rating}/10</span>
+              </div>
+              {place.notes && <p class="notes">{place.notes}</p>}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <!-- LIST VIEW -->
+    <div id="view-list" class="view">
+      <div class="list">
+        {placesData.map(place => (
+          <div class="list-row" data-cat={place.category} data-collection={place.collection ?? ''}>
+            <span class="list-emoji" style={`color:${categoryColor[place.category]}`}>
+              {categoryEmoji[place.category]}
+            </span>
+            <div class="list-info">
+              <span class="list-title">{place.title}</span>
+              <span class="list-city">{place.city}</span>
+            </div>
+            <div class="list-right">
+              {place.mustReturn && <span class="must-return">★ must return</span>}
+              <span class="stars small">{toStars(place.rating)}</span>
+              <span class="rating-num">{place.rating}/10</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <!-- MAP VIEW -->
+    <div id="view-map" class="view">
+      <div class="map-layout">
+        <div id="map"></div>
+        <div class="map-sidebar">
+          <p class="sidebar-hint">Click a card to fly to it</p>
+          <div class="map-list" id="map-list">
+            {placesData.map(place => (
+              <div
+                class="map-card"
+                data-cat={place.category}
+                data-collection={place.collection ?? ''}
+                data-lat={place.lat}
+                data-lng={place.lng}
+              >
+                <div class="map-card-top">
+                  <span style={`color:${categoryColor[place.category]}`}>
+                    {categoryEmoji[place.category]}
+                  </span>
+                  <span class="map-card-title">{place.title}</span>
+                  {place.mustReturn && <span class="must-return">★</span>}
+                </div>
+                <div class="stars small">{toStars(place.rating)} <span class="rating-num">{place.rating}/10</span></div>
+                <p class="city">{place.city}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</Layout>
+
+<style>
+  main {
+    padding: 7rem 2rem 4rem;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .page-header {
+    margin-bottom: 2rem;
+  }
+
+  h1 {
+    font-size: 2.5rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .sub {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+  }
+
+  .controls {
+    margin-bottom: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .top-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0;
+  }
+
+  .collection-tabs {
+    display: flex;
+    gap: 0;
+  }
+
+  .coll-tab {
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--text-muted);
+    font-family: inherit;
+    font-size: 0.85rem;
+    padding: 0.6rem 1rem;
+    cursor: pointer;
+    margin-bottom: -1px;
+    transition: color 0.15s, border-color 0.15s;
+  }
+
+  .coll-tab.active {
+    color: var(--text);
+    border-bottom-color: var(--text);
+  }
+
+  .view-tabs {
+    display: flex;
+    gap: 0.25rem;
+    background: var(--border);
+    padding: 0.25rem;
+    border-radius: 8px;
+    margin-bottom: 1px;
+  }
+
+  .tab {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-family: inherit;
+    font-size: 0.85rem;
+    padding: 0.35rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+  }
+
+  .tab.active {
+    background: var(--bg);
+    color: var(--text);
+  }
+
+  .filters {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .filter {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    font-family: inherit;
+    font-size: 0.8rem;
+    padding: 0.3rem 0.75rem;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .filter.active {
+    border-color: var(--text);
+    color: var(--text);
+  }
+
+  .view { display: none; }
+  .view.active { display: block; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .place-card {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: transform 0.2s;
+  }
+
+  .place-card:hover { transform: translateY(-2px); }
+  .place-card.hidden { display: none; }
+
+  .card-img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    display: block;
+  }
+
+  .placeholder {
+    height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    background: var(--border);
+  }
+
+  .card-body { padding: 1rem; }
+
+  .card-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .cat-pill { font-size: 0.75rem; }
+  .must-return { font-size: 0.7rem; color: #f4a729; font-weight: 500; }
+
+  h3 { font-size: 1rem; margin-bottom: 0.2rem; }
+
+  .city { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem; }
+
+  .stars {
+    font-size: 1rem;
+    color: #f4a729;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .stars.small { font-size: 0.85rem; }
+
+  .rating-num { font-size: 0.75rem; color: var(--text-muted); }
+
+  .notes { font-size: 0.85rem; color: var(--text-muted); line-height: 1.6; }
+
+  .list { display: flex; flex-direction: column; }
+
+  .list-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .list-row.hidden { display: none; }
+
+  .list-emoji { font-size: 1.25rem; }
+
+  .list-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  .list-title { font-size: 0.95rem; }
+  .list-city { font-size: 0.8rem; color: var(--text-muted); }
+
+  .list-right {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .map-layout {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 1.5rem;
+    height: 70vh;
+  }
+
+  #map {
+    height: 100%;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    z-index: 0;
+  }
+
+  .map-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    overflow-y: auto;
+  }
+
+  .sidebar-hint {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .map-card {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.75rem;
+    cursor: pointer;
+    transition: border-color 0.15s;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .map-card:hover { border-color: var(--text-muted); }
+  .map-card.hidden { display: none; }
+
+  .map-card-top {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+
+  .map-card-title { flex: 1; }
+
+  @media (max-width: 768px) {
+    .map-layout { grid-template-columns: 1fr; height: auto; }
+    #map { height: 50vh; }
+    .top-row { flex-direction: column; align-items: flex-start; }
+  }
+</style>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script define:vars={{ placesData, categoryColor }}>
+  // @ts-nocheck
+
+  let activeCollection = 'all';
+  let activeCategory = 'all';
+  let mapInstance = null;
+  let markers = [];
+
+  function filterAll() {
+    const allCards = document.querySelectorAll('.place-card, .list-row, .map-card');
+    allCards.forEach(el => {
+      const matchColl = activeCollection === 'all' || (el.dataset.collection && el.dataset.collection === activeCollection);
+      const matchCat = activeCategory === 'all' || el.dataset.cat === activeCategory;
+      el.classList.toggle('hidden', !(matchColl && matchCat));
+    });
+    if (mapInstance) updateMapMarkers();
+  }
+
+  // COLLECTION TABS
+  document.querySelectorAll('.coll-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      activeCollection = tab.dataset.collection;
+      document.querySelectorAll('.coll-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      filterAll();
+    });
+  });
+
+  // CATEGORY FILTERS
+  document.querySelectorAll('.filter').forEach(btn => {
+    btn.addEventListener('click', () => {
+      activeCategory = btn.dataset.cat;
+      document.querySelectorAll('.filter').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      filterAll();
+    });
+  });
+
+  // VIEW TABS
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById(`view-${tab.dataset.tab}`).classList.add('active');
+      if (tab.dataset.tab === 'map') initMap();
+    });
+  });
+
+  // MAP
+  function makePinIcon(color, isStar) {
+    const size = isStar ? 24 : 14;
+    const html = isStar
+      ? `<svg width="${size}" height="${size}" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="12,2 15,9 22,9 17,14 19,21 12,17 5,21 7,14 2,9 9,9" fill="${color}" stroke="white" stroke-width="1.5"/>
+        </svg>`
+      : `<svg width="${size}" height="${size}" viewBox="0 0 14 14" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="7" cy="7" r="6" fill="${color}" stroke="white" stroke-width="1.5"/>
+        </svg>`;
+
+    return L.divIcon({
+      html,
+      className: '',
+      iconSize: [size, size],
+      iconAnchor: [size/2, size/2],
+    });
+  }
+
+  function initMap() {
+    if (mapInstance) return;
+    const center = placesData.length
+      ? [placesData[0].lat, placesData[0].lng]
+      : [40.7128, -74.006];
+
+    mapInstance = L.map('map').setView(center, 13);
+
+    const isDark = !document.documentElement.classList.contains('light');
+
+    const lightTiles = L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png', {
+      attribution: '© Stadia Maps © OpenStreetMap contributors'
+    });
+
+    const darkTiles = L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png', {
+      attribution: '© Stadia Maps © OpenStreetMap contributors'
+    });
+
+    (isDark ? darkTiles : lightTiles).addTo(mapInstance);
+
+    document.addEventListener('click', (e) => {
+      if (e.target.closest('.theme-toggle')) {
+        setTimeout(() => {
+          const nowDark = !document.documentElement.classList.contains('light');
+          if (nowDark) { lightTiles.remove(); darkTiles.addTo(mapInstance); }
+          else { darkTiles.remove(); lightTiles.addTo(mapInstance); }
+        }, 50);
+      }
+    });
+
+    placesData.forEach(place => {
+      const color = categoryColor[place.category] || '#888';
+      const isStar = place.rating >= 9;
+      const icon = makePinIcon(color, isStar);
+
+      const marker = L.marker([place.lat, place.lng], { icon })
+        .addTo(mapInstance)
+        .bindPopup(`
+          <strong>${place.title}</strong><br/>
+          ${place.city}<br/>
+          <span style="color:#f4a729">${place.rating}/10</span>
+          ${place.mustReturn ? ' · ★ must return' : ''}
+        `);
+
+      markers.push({ marker, cat: place.category, collection: place.collection });
+    });
+
+    document.querySelectorAll('.map-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const lat = parseFloat(card.dataset.lat);
+        const lng = parseFloat(card.dataset.lng);
+        mapInstance.setView([lat, lng], 15);
+        markers.find(m =>
+          Math.abs(m.marker.getLatLng().lat - lat) < 0.0001
+        )?.marker.openPopup();
+      });
+    });
+  }
+
+  function updateMapMarkers() {
+    markers.forEach(({ marker, cat, collection }) => {
+      const matchColl = activeCollection === 'all' || collection === activeCollection;
+      const matchCat = activeCategory === 'all' || cat === activeCategory;
+      if (matchColl && matchCat) marker.addTo(mapInstance);
+      else marker.remove();
+    });
+  }
+</script>
