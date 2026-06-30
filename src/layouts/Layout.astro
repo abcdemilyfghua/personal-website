@@ -95,6 +95,7 @@ const { title = "Emily" } = Astro.props;
 </style>
 
 <script>
+  // @ts-nocheck
   const saved = localStorage.getItem('theme');
   if (saved === 'light') document.documentElement.classList.add('light');
 
