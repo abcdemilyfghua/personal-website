@@ -17,8 +17,41 @@ const { title = "Emily" } = Astro.props;
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   </head>
   <body>
-	<Nav />
+    <Nav />
     <slot />
+
+    <script>
+      // @ts-nocheck
+      const colors = ['#d4a8e0','#6fcf97','#b8d96f','#6fb5cf','#cfaa6f','#cf6f6f','#8a8acf','#b06fcf'];
+      let colorIndex = 0;
+
+      document.addEventListener('mousemove', (e) => {
+        const size = Math.random() * 12 + 6;
+        const color = colors[colorIndex % colors.length];
+        colorIndex++;
+
+        const c = document.createElement('div');
+        c.style.cssText = `
+          position:fixed;
+          left:${e.clientX}px;
+          top:${e.clientY}px;
+          width:${size}px;
+          height:${size}px;
+          border-radius:50%;
+          border:2px solid ${color};
+          transform:translate(-50%,-50%);
+          pointer-events:none;
+          z-index:9999;
+          transition:opacity 0.5s,transform 0.5s;
+        `;
+        document.body.appendChild(c);
+        requestAnimationFrame(() => {
+          c.style.opacity = '0';
+          c.style.transform = 'translate(-50%,-50%) scale(2.5)';
+        });
+        setTimeout(() => c.remove(), 500);
+      });
+    </script>
   </body>
 </html>
 
